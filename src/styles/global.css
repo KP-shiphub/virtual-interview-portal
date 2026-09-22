@@ -1,3 +1,36 @@
+/* =========================================================
+   STUDYVUE COLOR THEME
+   ========================================================= */
+
+:root {
+  --primary: #0f766e;
+  --primary-dark: #115e59;
+  --primary-light: #dff5f2;
+
+  --accent: #e85d4a;
+  --accent-dark: #c94735;
+  --accent-light: #fff0ec;
+
+  --secondary: #f59e0b;
+  --secondary-light: #fff7df;
+
+  --background: #f1faf9;
+  --background-warm: #fff8f5;
+
+  --surface: #ffffff;
+
+  --text-primary: #17353a;
+  --text-secondary: #5f7377;
+  --text-light: #ffffff;
+
+  --border: #d5e8e5;
+
+  --success: #15803d;
+  --danger: #dc2626;
+
+  --shadow-soft: 0 8px 24px rgba(15, 118, 110, 0.08);
+  --shadow-medium: 0 12px 30px rgba(23, 53, 58, 0.10);
+}
 :root {
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
@@ -44,8 +77,9 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  font-family: Arial, Helvetica, sans-serif;
   background: var(--background);
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 button,
@@ -87,14 +121,23 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 3px 14px rgba(15, 118, 110, 0.06);
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 11px;
-  font-weight: 700;
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-size: 1.15rem;
+  font-weight: 750;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.brand:hover {
+  color: var(--accent);
 }
 
 .brand-text {
@@ -108,11 +151,16 @@ a {
 }
 
 .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-  font-size: 14px;
-  color: var(--text-soft);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.nav-links:hover {
+  color: var(--primary);
 }
 
 .nav-links a {
@@ -609,6 +657,7 @@ a {
 
 .nav-links a.active {
   color: var(--primary);
+  font-weight: 650;
 }
 
 .nav-links .nav-button {
@@ -2461,4 +2510,17 @@ button:disabled {
 }
 
 
+@media (max-width: 768px) {
+  .brand {
+    font-size: 1rem;
+  }
+}
 
+@media (max-width: 520px) {
+  .brand {
+    font-size: 0.92rem;
+    max-width: 220px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+}

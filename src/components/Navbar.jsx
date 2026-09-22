@@ -40,7 +40,7 @@ function Navbar() {
             className="brand"
           >
             <span className="brand-text">
-              Virtual Interview
+              StudyVue - Virtual Interview Portal
             </span>
           </Link>
         </div>
@@ -56,7 +56,7 @@ function Navbar() {
           className="brand"
         >
           <span className="brand-text">
-            Virtual Interview
+            StudyVue - Virtual Interview Portal
           </span>
         </Link>
 
