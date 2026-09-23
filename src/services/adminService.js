@@ -14,15 +14,13 @@ export async function getParticipants() {
     error,
   } = await supabase
     .from('profiles')
-    .select(
-      `
+    .select(`
       id,
       full_name,
       email,
       role,
       created_at
-      `
-    )
+    `)
     .eq('role', 'participant')
     .order('created_at', {
       ascending: false,
@@ -46,8 +44,7 @@ export async function getInterviews() {
     error,
   } = await supabase
     .from('interviews')
-    .select(
-      `
+    .select(`
       id,
       participant_id,
       status,
@@ -55,8 +52,7 @@ export async function getInterviews() {
       started_at,
       completed_at,
       created_at
-      `
-    )
+    `)
     .order('created_at', {
       ascending: false,
     })
@@ -112,6 +108,7 @@ export async function getAdminStatistics() {
       .eq('status', 'in_progress'),
   ])
 
+
   if (profilesResult.error) {
     throw profilesResult.error
   }
@@ -127,6 +124,7 @@ export async function getAdminStatistics() {
   if (inProgressResult.error) {
     throw inProgressResult.error
   }
+
 
   return {
     totalParticipants:
@@ -156,15 +154,13 @@ export async function getParticipant(
     error,
   } = await supabase
     .from('profiles')
-    .select(
-      `
+    .select(`
       id,
       full_name,
       email,
       role,
       created_at
-      `
-    )
+    `)
     .eq('id', participantId)
     .single()
 
@@ -188,8 +184,7 @@ export async function getParticipantInterview(
     error,
   } = await supabase
     .from('interviews')
-    .select(
-      `
+    .select(`
       id,
       participant_id,
       status,
@@ -197,8 +192,7 @@ export async function getParticipantInterview(
       started_at,
       completed_at,
       created_at
-      `
-    )
+    `)
     .eq('participant_id', participantId)
     .order('created_at', {
       ascending: false,
@@ -216,6 +210,8 @@ export async function getParticipantInterview(
 
 // ============================================================
 // GET INTERVIEW ANSWERS
+// Answers are returned in the order they were created.
+// This gives us interview serial numbers 1 - 20.
 // ============================================================
 
 export async function getInterviewAnswers(
@@ -226,8 +222,7 @@ export async function getInterviewAnswers(
     error,
   } = await supabase
     .from('interview_answers')
-    .select(
-      `
+    .select(`
       id,
       interview_id,
       question_id,
@@ -243,10 +238,12 @@ export async function getInterviewAnswers(
         preparation_time,
         answer_time
       )
-      `
+    `)
+    .eq(
+      'interview_id',
+      interviewId
     )
-    .eq('interview_id', interviewId)
-    .order('question_id', {
+    .order('created_at', {
       ascending: true,
     })
 
@@ -262,10 +259,6 @@ export async function getInterviewAnswers(
 // CREATE TEMPORARY VIDEO URL
 // ============================================================
 
-// ============================================================
-// CREATE TEMPORARY VIDEO URL
-// ============================================================
-
 export async function createRecordingUrl(
   videoPath
 ) {
@@ -275,10 +268,6 @@ export async function createRecordingUrl(
     )
   }
 
-  console.log(
-    'Creating signed URL for:',
-    videoPath
-  )
 
   const {
     data,
@@ -291,17 +280,14 @@ export async function createRecordingUrl(
       60 * 10
     )
 
-  if (error) {
-    console.error(
-      'Supabase signed URL error:',
-      error
-    )
 
+  if (error) {
     throw new Error(
       error.message ||
         'Supabase could not create a signed URL.'
     )
   }
+
 
   if (!data?.signedUrl) {
     throw new Error(
@@ -309,9 +295,6 @@ export async function createRecordingUrl(
     )
   }
 
-  console.log(
-    'Signed URL created successfully.'
-  )
 
   return data.signedUrl
 }

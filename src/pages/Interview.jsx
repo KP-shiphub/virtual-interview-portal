@@ -12,10 +12,9 @@ import {
   uploadInterviewRecording,
 } from '../services/interviewService'
 
+
 function getSupportedRecorderOptions() {
-  if (
-    typeof MediaRecorder === 'undefined'
-  ) {
+  if (typeof MediaRecorder === 'undefined') {
     return null
   }
 
@@ -39,11 +38,7 @@ function getSupportedRecorderOptions() {
   ]
 
   for (const type of supportedTypes) {
-    if (
-      MediaRecorder.isTypeSupported(
-        type.mimeType
-      )
-    ) {
+    if (MediaRecorder.isTypeSupported(type.mimeType)) {
       return type
     }
   }
@@ -53,25 +48,15 @@ function getSupportedRecorderOptions() {
 
 
 function formatTime(seconds) {
-  const safeSeconds = Math.max(
-    0,
-    seconds
-  )
+  const safeSeconds = Math.max(0, seconds)
 
-  const minutes = Math.floor(
-    safeSeconds / 60
-  )
+  const minutes = Math.floor(safeSeconds / 60)
 
-  const remainingSeconds =
-    safeSeconds % 60
+  const remainingSeconds = safeSeconds % 60
 
-  return `${String(minutes).padStart(
-    2,
-    '0'
-  )}:${String(remainingSeconds).padStart(
-    2,
-    '0'
-  )}`
+  return `${String(minutes).padStart(2, '0')}:${String(
+    remainingSeconds
+  ).padStart(2, '0')}`
 }
 
 
@@ -84,8 +69,7 @@ function Interview() {
 
   const recorderRef = useRef(null)
   const chunksRef = useRef([])
-  const lastRecordingRef =
-  useRef(null)
+  const lastRecordingRef = useRef(null)
 
   const timerRef = useRef(null)
 
@@ -93,21 +77,20 @@ function Interview() {
 
   const questionsRef = useRef([])
   const interviewRef = useRef(null)
-  const currentQuestionIndexRef =
-    useRef(0)
+
+  const currentQuestionIndexRef = useRef(0)
 
   const phaseRef = useRef('loading')
 
-  const [questions, setQuestions] =
-    useState([])
+
+  const [questions, setQuestions] = useState([])
 
   const [
     currentQuestionIndex,
     setCurrentQuestionIndex,
   ] = useState(0)
 
-  const [phase, setPhase] =
-    useState('loading')
+  const [phase, setPhase] = useState('loading')
 
   const [
     preparationRemaining,
@@ -119,42 +102,31 @@ function Interview() {
     setAnswerRemaining,
   ] = useState(120)
 
-  const [
-    currentQuestion,
-    setCurrentQuestion,
-  ] = useState(null)
-
-  const [interview, setInterview] =
+  const [currentQuestion, setCurrentQuestion] =
     useState(null)
 
-  const [loadingMessage, setLoadingMessage] =
-    useState(
-      'Preparing your interview...'
-    )
+  const [interview, setInterview] = useState(null)
 
-  const [error, setError] =
-    useState('')
+  const [loadingMessage, setLoadingMessage] = useState(
+    'Preparing your interview...'
+  )
 
-  const [uploadError, setUploadError] =
-    useState('')
+  const [error, setError] = useState('')
 
-  const [isUploading, setIsUploading] =
-    useState(false)
+  const [uploadError, setUploadError] = useState('')
 
-  const [deviceReady, setDeviceReady] =
-    useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const [deviceReady, setDeviceReady] = useState(false)
 
   const [recordingMimeType, setRecordingMimeType] =
     useState('')
 
 
-  const updatePhase = useCallback(
-    (nextPhase) => {
-      phaseRef.current = nextPhase
-      setPhase(nextPhase)
-    },
-    []
-  )
+  const updatePhase = useCallback((nextPhase) => {
+    phaseRef.current = nextPhase
+    setPhase(nextPhase)
+  }, [])
 
 
   const cleanupTimer = useCallback(() => {
@@ -180,8 +152,7 @@ function Interview() {
   }, [])
 
 
-  const attachStreamToVideo =
-  useCallback(() => {
+  const attachStreamToVideo = useCallback(() => {
     if (
       videoRef.current &&
       streamRef.current
@@ -192,24 +163,24 @@ function Interview() {
   }, [])
 
 
-useEffect(() => {
-  if (
-    videoRef.current &&
-    streamRef.current
-  ) {
-    videoRef.current.srcObject =
+  useEffect(() => {
+    if (
+      videoRef.current &&
       streamRef.current
+    ) {
+      videoRef.current.srcObject =
+        streamRef.current
 
-    videoRef.current
-      .play()
-      .catch((error) => {
-        console.warn(
-          'Video autoplay was prevented:',
-          error
-        )
-      })
-  }
-}, [phase, deviceReady])
+      videoRef.current
+        .play()
+        .catch((playError) => {
+          console.warn(
+            'Video autoplay was prevented:',
+            playError
+          )
+        })
+    }
+  }, [phase, deviceReady])
 
 
   async function requestCameraAndMicrophone() {
@@ -242,12 +213,13 @@ useEffect(() => {
       recordingStartedAt,
       recorderContentType
     ) => {
-        lastRecordingRef.current = {
-  blob,
-  question,
-  recordingStartedAt,
-  recorderContentType,
-}
+      lastRecordingRef.current = {
+        blob,
+        question,
+        recordingStartedAt,
+        recorderContentType,
+      }
+
       if (!user) {
         throw new Error(
           'You are no longer signed in.'
@@ -265,23 +237,29 @@ useEffect(() => {
 
       setIsUploading(true)
       setUploadError('')
+
       updatePhase('uploading')
 
       try {
         setLoadingMessage(
-          `Uploading answer ${question.question_number} of 20...`
+          `Uploading answer ${
+            question.question_number
+          } of 20...`
         )
 
-        const uploadResult =
-          await uploadInterviewRecording({
-            participantId: user.id,
-            interviewId,
-            questionNumber:
-              question.question_number,
-            blob,
-            contentType:
-              recorderContentType,
-          })
+const interviewQuestionNumber =
+  currentQuestionIndexRef.current + 1
+
+const uploadResult =
+  await uploadInterviewRecording({
+    participantId: user.id,
+    interviewId,
+    questionNumber:
+      interviewQuestionNumber,
+    blob,
+    contentType:
+      recorderContentType,
+  })
 
         const completedAt =
           new Date().toISOString()
@@ -295,9 +273,11 @@ useEffect(() => {
           completedAt,
         })
 
+
         const isLastQuestion =
           currentQuestionIndexRef.current ===
           questionsRef.current.length - 1
+
 
         if (isLastQuestion) {
           setLoadingMessage(
@@ -326,6 +306,7 @@ useEffect(() => {
           return
         }
 
+
         const nextQuestionIndex =
           currentQuestionIndexRef.current + 1
 
@@ -336,6 +317,7 @@ useEffect(() => {
           nextQuestionIndex
         )
 
+
         const nextQuestion =
           questionsRef.current[
             nextQuestionIndex
@@ -345,10 +327,11 @@ useEffect(() => {
           nextQuestion
         )
 
-        await updateInterviewProgress(
-          interviewId,
-          nextQuestion.question_number
-        )
+
+await updateInterviewProgress(
+  interviewId,
+  nextQuestionIndex + 1
+)
 
         setPreparationRemaining(
           nextQuestion.preparation_time
@@ -415,8 +398,10 @@ useEffect(() => {
         return
       }
 
+
       const recorderOptions =
         getSupportedRecorderOptions()
+
 
       if (!recorderOptions) {
         setError(
@@ -427,6 +412,7 @@ useEffect(() => {
 
         return
       }
+
 
       try {
         chunksRef.current = []
@@ -446,11 +432,13 @@ useEffect(() => {
           recorderOptions.mimeType
         )
 
+
         const recordingStartedAt =
           new Date().toISOString()
 
         recordingStartTimeRef.current =
           recordingStartedAt
+
 
         recorder.ondataavailable =
           (event) => {
@@ -463,6 +451,7 @@ useEffect(() => {
               )
             }
           }
+
 
         recorder.onerror = (event) => {
           console.error(
@@ -477,6 +466,7 @@ useEffect(() => {
           updatePhase('error')
         }
 
+
         recorder.onstop = async () => {
           const blob = new Blob(
             chunksRef.current,
@@ -488,6 +478,7 @@ useEffect(() => {
           chunksRef.current = []
           recorderRef.current = null
 
+
           if (blob.size === 0) {
             setError(
               'The recording was empty. Please try again.'
@@ -498,6 +489,7 @@ useEffect(() => {
             return
           }
 
+
           await saveRecording(
             blob,
             question,
@@ -505,6 +497,7 @@ useEffect(() => {
             recorderOptions.mimeType
           )
         }
+
 
         recorder.start(1000)
 
@@ -533,43 +526,82 @@ useEffect(() => {
   )
 
 
+  /*
+   * ============================================================
+   * INITIALIZE INTERVIEW
+   *
+   * interviewService.js is responsible for selecting the
+   * questions.
+   *
+   * The service should return exactly 20 questions from the
+   * 50-question question bank.
+   *
+   * Interview.jsx does NOT randomly select another 20.
+   * ============================================================
+   */
+
   const initializeInterview =
     useCallback(async () => {
       if (!user) {
         return
       }
 
+
       try {
         updatePhase('loading')
 
         setLoadingMessage(
-          'Loading interview questions...'
+          'Loading your interview questions...'
         )
 
-        const loadedQuestions =
-          await getInterviewQuestions()
 
-        if (loadedQuestions.length !== 20) {
-          throw new Error(
-            `The interview requires exactly 20 questions. Found ${loadedQuestions.length}.`
-          )
-        }
-
-        questionsRef.current =
-          loadedQuestions
-
-        setQuestions(
-          loadedQuestions
-        )
-
+        /*
+         * getInterviewQuestions()
+         *
+         * The updated interviewService.js should:
+         *
+         * 1. Read the 50 questions.
+         * 2. Select 20 questions.
+         * 3. Return those 20 questions here.
+         */
         setLoadingMessage(
-          'Preparing your interview session...'
-        )
+  'Preparing your interview session...'
+)
 
-        const loadedInterview =
-          await getOrCreateInterview(
-            user.id
-          )
+const loadedInterview =
+  await getOrCreateInterview(
+    user.id
+  )
+
+interviewRef.current =
+  loadedInterview
+
+setInterview(
+  loadedInterview
+)
+
+setLoadingMessage(
+  'Loading your interview questions...'
+)
+
+const loadedQuestions =
+  await getInterviewQuestions(
+    loadedInterview.id
+  )
+
+if (loadedQuestions.length !== 20) {
+  throw new Error(
+    `The interview requires exactly 20 questions. Found ${loadedQuestions.length}.`
+  )
+}
+
+questionsRef.current =
+  loadedQuestions
+
+setQuestions(
+  loadedQuestions
+)
+
 
         interviewRef.current =
           loadedInterview
@@ -578,10 +610,16 @@ useEffect(() => {
           loadedInterview
         )
 
+
+        /*
+         * Resume from the saved question number if
+         * the interview was already started.
+         */
         const savedQuestionNumber =
           Number(
             loadedInterview.current_question_number
           ) || 1
+
 
         const safeQuestionIndex =
           Math.min(
@@ -592,6 +630,7 @@ useEffect(() => {
             loadedQuestions.length - 1
           )
 
+
         currentQuestionIndexRef.current =
           safeQuestionIndex
 
@@ -599,19 +638,24 @@ useEffect(() => {
           safeQuestionIndex
         )
 
+
         const question =
           loadedQuestions[
             safeQuestionIndex
           ]
 
+
         setCurrentQuestion(question)
+
+
         if (
-  savedQuestionNumber > 1
-) {
-  setLoadingMessage(
-    `Resuming your interview from Question ${savedQuestionNumber}...`
-  )
-}
+          savedQuestionNumber > 1
+        ) {
+          setLoadingMessage(
+            `Resuming your interview from Question ${savedQuestionNumber}...`
+          )
+        }
+
 
         setPreparationRemaining(
           question.preparation_time
@@ -621,43 +665,52 @@ useEffect(() => {
           question.answer_time
         )
 
+
         setLoadingMessage(
           'Requesting camera and microphone access...'
         )
 
+
         await requestCameraAndMicrophone()
+
 
         setLoadingMessage('')
 
         updatePhase('preparing')
       } catch (initializationError) {
-  console.error(
-    'Interview initialization error:',
-    initializationError
-  )
+        console.error(
+          'Interview initialization error:',
+          initializationError
+        )
 
-  if (
-    initializationError?.code ===
-    'INTERVIEW_ALREADY_COMPLETED'
-  ) {
-    navigate(
-      '/dashboard',
-      {
-        replace: true,
+
+        if (
+          initializationError?.code ===
+          'INTERVIEW_ALREADY_COMPLETED'
+        ) {
+          navigate(
+            '/dashboard',
+            {
+              replace: true,
+            }
+          )
+
+          return
+        }
+
+
+        setError(
+          initializationError?.message ||
+            'Unable to start the interview.'
+        )
+
+        updatePhase('error')
       }
-    )
-
-    return
-  }
-
-  setError(
-    initializationError?.message ||
-      'Unable to start the interview.'
-  )
-
-  updatePhase('error')
-}
-    }, [updatePhase, user])
+    }, [
+      navigate,
+      updatePhase,
+      user,
+    ])
 
 
   useEffect(() => {
@@ -682,60 +735,68 @@ useEffect(() => {
     initializeInterview,
   ])
 
+
   useEffect(() => {
-  const stream = streamRef.current
+    const stream =
+      streamRef.current
 
-  if (!stream) {
-    return
-  }
+    if (!stream) {
+      return
+    }
 
-  const videoTrack =
-    stream.getVideoTracks()[0]
 
-  const audioTrack =
-    stream.getAudioTracks()[0]
+    const videoTrack =
+      stream.getVideoTracks()[0]
 
-  function handleVideoEnded() {
-    setError(
-      'Your camera connection was lost. Please reconnect the camera and try again.'
-    )
+    const audioTrack =
+      stream.getAudioTracks()[0]
 
-    updatePhase('error')
-  }
 
-  function handleAudioEnded() {
-    setError(
-      'Your microphone connection was lost. Please reconnect the microphone and try again.'
-    )
+    function handleVideoEnded() {
+      setError(
+        'Your camera connection was lost. Please reconnect the camera and try again.'
+      )
 
-    updatePhase('error')
-  }
+      updatePhase('error')
+    }
 
-  videoTrack?.addEventListener(
-    'ended',
-    handleVideoEnded
-  )
 
-  audioTrack?.addEventListener(
-    'ended',
-    handleAudioEnded
-  )
+    function handleAudioEnded() {
+      setError(
+        'Your microphone connection was lost. Please reconnect the microphone and try again.'
+      )
 
-  return () => {
-    videoTrack?.removeEventListener(
+      updatePhase('error')
+    }
+
+
+    videoTrack?.addEventListener(
       'ended',
       handleVideoEnded
     )
 
-    audioTrack?.removeEventListener(
+    audioTrack?.addEventListener(
       'ended',
       handleAudioEnded
     )
-  }
-}, [
-  deviceReady,
-  updatePhase,
-])
+
+
+    return () => {
+      videoTrack?.removeEventListener(
+        'ended',
+        handleVideoEnded
+      )
+
+      audioTrack?.removeEventListener(
+        'ended',
+        handleAudioEnded
+      )
+    }
+  }, [
+    deviceReady,
+    updatePhase,
+  ])
+
 
   useEffect(() => {
     if (
@@ -745,14 +806,18 @@ useEffect(() => {
       return
     }
 
+
     cleanupTimer()
+
 
     setPreparationRemaining(
       currentQuestion.preparation_time
     )
 
+
     let remaining =
       currentQuestion.preparation_time
+
 
     timerRef.current =
       setInterval(() => {
@@ -762,6 +827,7 @@ useEffect(() => {
           Math.max(remaining, 0)
         )
 
+
         if (remaining <= 0) {
           cleanupTimer()
 
@@ -770,6 +836,7 @@ useEffect(() => {
           )
         }
       }, 1000)
+
 
     return cleanupTimer
   }, [
@@ -788,14 +855,18 @@ useEffect(() => {
       return
     }
 
+
     cleanupTimer()
+
 
     let remaining =
       currentQuestion.answer_time
 
+
     setAnswerRemaining(
       remaining
     )
+
 
     timerRef.current =
       setInterval(() => {
@@ -805,11 +876,14 @@ useEffect(() => {
           Math.max(remaining, 0)
         )
 
+
         if (remaining <= 0) {
           cleanupTimer()
+
           stopRecording()
         }
       }, 1000)
+
 
     return cleanupTimer
   }, [
@@ -821,28 +895,31 @@ useEffect(() => {
 
 
   useEffect(() => {
-function preventAccidentalLeave(
-  event
-) {
-  const unsafePhases = [
-    'preparing',
-    'recording',
-    'uploading',
-    'upload-error',
-  ]
+    function preventAccidentalLeave(
+      event
+    ) {
+      const unsafePhases = [
+        'preparing',
+        'recording',
+        'uploading',
+        'upload-error',
+      ]
 
-  if (
-    unsafePhases.includes(phase)
-  ) {
-    event.preventDefault()
-    event.returnValue = ''
-  }
-}
+
+      if (
+        unsafePhases.includes(phase)
+      ) {
+        event.preventDefault()
+        event.returnValue = ''
+      }
+    }
+
 
     window.addEventListener(
       'beforeunload',
       preventAccidentalLeave
     )
+
 
     return () => {
       window.removeEventListener(
@@ -853,28 +930,29 @@ function preventAccidentalLeave(
   }, [phase])
 
 
-async function handleRetryUpload() {
-  const previousRecording =
-    lastRecordingRef.current
+  async function handleRetryUpload() {
+    const previousRecording =
+      lastRecordingRef.current
 
-  if (!previousRecording) {
-    window.location.reload()
-    return
+
+    if (!previousRecording) {
+      window.location.reload()
+
+      return
+    }
+
+
+    await saveRecording(
+      previousRecording.blob,
+      previousRecording.question,
+      previousRecording.recordingStartedAt,
+      previousRecording.recorderContentType
+    )
   }
-
-  await saveRecording(
-    previousRecording.blob,
-    previousRecording.question,
-    previousRecording.recordingStartedAt,
-    previousRecording.recorderContentType
-  )
-}
 
 
   function handleFinishAnswer() {
-    if (
-      phase === 'recording'
-    ) {
+    if (phase === 'recording') {
       stopRecording()
     }
   }
@@ -889,6 +967,7 @@ async function handleRetryUpload() {
         )
       : 0
 
+
   if (phase === 'loading') {
     return (
       <section className="interview-page">
@@ -898,7 +977,9 @@ async function handleRetryUpload() {
               ...
             </div>
 
-            <h1>Preparing your interview</h1>
+            <h1>
+              Preparing your interview
+            </h1>
 
             <p>
               {loadingMessage}
@@ -908,6 +989,7 @@ async function handleRetryUpload() {
       </section>
     )
   }
+
 
   if (phase === 'error') {
     return (
@@ -953,9 +1035,11 @@ async function handleRetryUpload() {
     )
   }
 
+
   if (!currentQuestion) {
     return null
   }
+
 
   return (
     <section className="interview-workspace">
@@ -978,6 +1062,7 @@ async function handleRetryUpload() {
           </div>
         </div>
 
+
         <div className="progress-track">
           <div
             className="progress-fill"
@@ -987,6 +1072,7 @@ async function handleRetryUpload() {
           />
         </div>
       </div>
+
 
       <div className="container interview-main">
         <div className="interview-video-card">
@@ -1008,6 +1094,7 @@ async function handleRetryUpload() {
               </h2>
             </div>
 
+
             {phase === 'recording' && (
               <span className="recording-indicator">
                 <span />
@@ -1015,6 +1102,7 @@ async function handleRetryUpload() {
               </span>
             )}
           </div>
+
 
           <div className="interview-video">
             <video
@@ -1024,11 +1112,13 @@ async function handleRetryUpload() {
               muted
             />
 
+
             {!deviceReady && (
               <div className="video-overlay">
                 Camera unavailable
               </div>
             )}
+
 
             {phase === 'preparing' && (
               <div className="question-overlay preparation-overlay">
@@ -1049,6 +1139,7 @@ async function handleRetryUpload() {
               </div>
             )}
 
+
             {phase === 'recording' && (
               <div className="question-overlay recording-overlay">
                 <div className="timer-label">
@@ -1062,6 +1153,7 @@ async function handleRetryUpload() {
                 </div>
               </div>
             )}
+
 
             {phase === 'uploading' && (
               <div className="question-overlay">
@@ -1080,6 +1172,7 @@ async function handleRetryUpload() {
               </div>
             )}
 
+
             {phase === 'upload-error' && (
               <div className="question-overlay">
                 <strong>
@@ -1094,6 +1187,7 @@ async function handleRetryUpload() {
             )}
           </div>
 
+
           <div className="question-content">
             <span>
               Question{' '}
@@ -1105,6 +1199,7 @@ async function handleRetryUpload() {
             </h1>
           </div>
         </div>
+
 
         <aside className="interview-sidebar">
           <div className="sidebar-card">
@@ -1146,6 +1241,7 @@ async function handleRetryUpload() {
             </p>
           </div>
 
+
           <div className="sidebar-card">
             <span className="sidebar-label">
               INTERVIEW PROGRESS
@@ -1153,6 +1249,7 @@ async function handleRetryUpload() {
 
             <div className="sidebar-progress-number">
               {currentQuestionIndex + 1}
+
               <span>
                 / {questions.length}
               </span>
@@ -1167,6 +1264,7 @@ async function handleRetryUpload() {
             </div>
           </div>
 
+
           {phase === 'recording' && (
             <button
               type="button"
@@ -1179,8 +1277,8 @@ async function handleRetryUpload() {
             </button>
           )}
 
-          {phase ===
-            'upload-error' && (
+
+          {phase === 'upload-error' && (
             <div className="sidebar-card upload-error-card">
               <span className="sidebar-label">
                 UPLOAD ERROR
@@ -1207,5 +1305,6 @@ async function handleRetryUpload() {
     </section>
   )
 }
+
 
 export default Interview
